@@ -5,17 +5,29 @@ extern const char *dev_num;
 extern const char *rtu_num;
 extern const char fw_version[2];
 
+
 static void rtu_xmit_data(char *msg); 
 static void read_param_n_net_puts(char *msg);
+static uint16_t get_bat_volt(void) ;
+static uint16_t get_solar_volt(void);
+
 
 int main(void) {
 char msg[RTU_MSG_SIZE];
+uint16_t bat_volt;	
 	
 	board_init();
 	read_param_n_net_puts(msg);
 	
 	while(1) {
 		IWDG_REFRESH();
+		
+		bat_volt = get_bat_volt();
+		if((bat_volt > 115) || (bat_volt < 140)) {
+			CHARGE_ON();
+		} else {
+			CHARGE_OFF();
+		}
 		
 		if(is_time_to_report() || is_ring(rtu_param.phone1)) {
 			read_param_n_net_puts(msg);
@@ -44,8 +56,10 @@ s_rcv_cfg *cfg;
 	time = read_bcd_time();
 	rssi = get_rssi();
 	rssi = ((rssi/10)<<4)+rssi%10;
-	bat_volt = get_adc(ADC_CHSELR_CHSEL9)*3.3/409.5*13;
+	bat_volt = get_bat_volt();
 	bat_volt = __REV16(bat_volt);
+	solar_volt = get_solar_volt();
+	solar_volt = __REV16(solar_volt);
 	memset(msg, 0, 1024);
 	
 	memcpy(msg+0x00, &p_cnt, 0x02*2);
@@ -120,4 +134,12 @@ char header[] = "460029125715486";
 //			send_sms(rtu_param.phone1,"connect server timeout.");
 		}	
 	}		
+}
+
+static uint16_t get_bat_volt(void) {
+	return get_adc(ADC_CHSELR_CHSEL9)*3.3/409.5*13;
+}
+
+static uint16_t get_solar_volt(void) {
+	return get_adc(ADC_CHSELR_CHSEL8)*3.3/409.5*13;
 }
