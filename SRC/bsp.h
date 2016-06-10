@@ -12,12 +12,13 @@
 #include	"crc16.h"
 #include	"param.h"
 #include	"mg301.h"
+#include	"adc.h"
 
 
 #define		SYSCLK								8000000
 
 #define		PARAM_SAVE_ADDR				0x0800F000
-#define		RAINFALL_SAVE_ADDR		0x0800F400
+#define		UID_SAVE_ADDR					0x0800F800
 
 #define		USART1_BUF_MAX				512
 #define		USART2_BUF_MAX				256
@@ -37,6 +38,7 @@
 #define		PWR_LED_ON()				(GPIOB->ODR &= ~GPIO_ODR_12)
 #define		PWR_LED_OFF()				(GPIOB->ODR |= GPIO_ODR_12)
 
+#define		IWDG_REFRESH()			IWDG->KR = 0xAAAA
 
 //public function prototype
 void board_init(void);
@@ -46,5 +48,6 @@ void pulse_cnt_handle(void);
 uint32_t get_pulse_cnt(void);
 void clr_pulse_cnt(void);
 void gpio_init(void);
+void iwdg_init(void);
 
 #endif		//__BSP_H__

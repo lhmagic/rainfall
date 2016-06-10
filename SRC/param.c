@@ -2,9 +2,9 @@
 
 s_param  rtu_param;
 
-char dev_num[18] = "F28-1353";
-char serial_num[18] = "D28-1353";
-char fw_version[2] = "\x03\x80";
+const char *dev_num = (char *)UID_SAVE_ADDR;
+const char *rtu_num = (char *)(UID_SAVE_ADDR+10);
+const char fw_version[2] = "\x03\x80";
 static const char unknown_data[36] = "\x00\x00\x88\xA4\x00\x04\x00\x7B\x7F\xBF\xFD\xBF\xFF\xBF";
 
 static const uint8_t upload_time_table[][2] = {
@@ -62,16 +62,40 @@ void rs485_handle(char *buf, uint16_t cnt) {
 				construct_rsp(buf, cnt);
 				//response code in construct_rsp function.
 			}
+		case WRITE_UID_LEN:
+			//format
+			//01 10 	0A 	dev_num 	rtu_num crc16
+			update_n_wirte_uid(buf);
 			break;
 		default:
 			break;
 	}
 }
 
+uint8_t update_n_wirte_uid(char *buf) {
+uint16_t crc;
+uint8_t temp[20];	
+	
+	crc = (buf[WRITE_UID_LEN-2]<<8) | (buf[WRITE_UID_LEN-1]);
+
+	if(crc16((uint8_t *)buf, WRITE_UID_LEN-2) != crc)
+		return 1;
+	
+	if(buf[2] != 10)
+		return 1;
+	
+	memcpy(temp, buf+3, 20);
+	flash_write(UID_SAVE_ADDR, temp, 20);
+	
+	xputs("\x01\x10\x0A\xAD\xC7");
+	
+	return 0;
+}
+
 uint8_t parse_param(char *buf, uint16_t cnt) {
 uint16_t i, crc;
 uint8_t offset;
-s_rcv_cfg *cfg;	
+s_rcv_cfg *cfg;
 	
 	crc = (buf[RCV_CFG_LEN-2]<<8) | (buf[RCV_CFG_LEN-1]);
 
@@ -164,7 +188,7 @@ uint16_t crc, i;
 		//pad 2 byte
 		memcpy(msg+55, (const char *)(cfg->server[0]), 200);
 		memcpy(msg+255, (const char *)(cfg->phone[0]), 100);
-		memcpy(msg+355, serial_num, 18);	//serial num
+		memcpy(msg+355, dev_num, 18);	//serial num
 		memcpy(msg+373, (const char *)(cfg->apn), 20);
 		memcpy(msg+393, (const char *)(cfg->uname), 10);
 		memcpy(msg+403, (const char *)(cfg->passwd), 10);

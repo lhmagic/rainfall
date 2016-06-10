@@ -1,45 +1,24 @@
 #include	"bsp.h"
 
 extern s_param  rtu_param;
-extern char dev_num[18];
-extern char serial_num[18];
-extern char fw_version[2];
+extern const char *dev_num;
+extern const char *rtu_num;
+extern const char fw_version[2];
 
-const char header[] = "460029125715486";
-
-static void rtu_xmit(char *msg);
+static void rtu_xmit_data(char *msg); 
+static void read_param_n_net_puts(char *msg);
 
 int main(void) {
 char msg[RTU_MSG_SIZE];
 	
 	board_init();
-	if(read_local_param() == 0) {
-		set_profile(0, rtu_param.ip1, rtu_param.apn, rtu_param.uname, rtu_param.passwd);
-		if(net_open(0) == 0) {
-			net_puts(0, header);
-			sleep(3);		
-			rtu_xmit(msg);
-			net_write(0, msg, 0x152*2);
-			net_close(0);
-		}		
-	}
-		
+	read_param_n_net_puts(msg);
+	
 	while(1) {
+		IWDG_REFRESH();
 		
 		if(is_time_to_report() || is_ring(rtu_param.phone1)) {
-			if(read_local_param() == 0) {
-				set_profile(0, rtu_param.ip1, rtu_param.apn, rtu_param.uname, rtu_param.passwd);
-				
-				if(net_open(0) == 0) {
-					net_puts(0, header);
-					sleep(3);		
-					rtu_xmit(msg);
-					net_write(0, msg, 0x152*2);
-					net_close(0);
-				}	else {
-					//send_sms(rtu_param.phone1,"connect server timeout.");
-				}	
-			}				
+			read_param_n_net_puts(msg);
 		}
 		
 		if(is_rcv_nwtime()) {
@@ -53,19 +32,20 @@ char msg[RTU_MSG_SIZE];
 	}
 }
 
-static void rtu_xmit(char *msg) {
+static void rtu_xmit_data(char *msg) {
 char *time;
 uint8_t rssi;
 uint32_t p_cnt, i;
-uint16_t solar_volt=0, bat_volt=0x7a00;
+uint16_t solar_volt=0, bat_volt;
 s_rcv_cfg *cfg;
 	
 	cfg = (s_rcv_cfg *)PARAM_SAVE_ADDR;
-	p_cnt = __rev(get_pulse_cnt());
+	p_cnt = __REV(get_pulse_cnt());
 	time = read_bcd_time();
 	rssi = get_rssi();
 	rssi = ((rssi/10)<<4)+rssi%10;
-	
+	bat_volt = get_adc(ADC_CHSELR_CHSEL9)*3.3/409.5*13;
+	bat_volt = __REV16(bat_volt);
 	memset(msg, 0, 1024);
 	
 	memcpy(msg+0x00, &p_cnt, 0x02*2);
@@ -77,7 +57,7 @@ s_rcv_cfg *cfg;
 	memcpy(msg+0x80*2, &solar_volt, 2);
 	memcpy(msg+0x81*2, &bat_volt, 2);
 	memcpy(msg+0x82*2, time, 6);
-	memcpy(msg+0x85*2, serial_num, 8);
+	memcpy(msg+0x85*2, rtu_num, 8);
 	memcpy(msg+0x89*2, fw_version, 2);
 	
 	memcpy(msg+0x90*2, cfg->bat_type, 2);
@@ -108,4 +88,36 @@ s_rcv_cfg *cfg;
 			msg[i] = ' ';
 		}
 	}
+}
+
+void read_param_n_net_puts(char *msg) {
+char header[] = "460029125715486";
+	
+	if(read_local_param() == 0) {
+		set_profile(0, rtu_param.ip1, rtu_param.apn, rtu_param.uname, rtu_param.passwd);
+		
+		if(net_open(0) == 0) {
+			net_puts(0, header);
+			sleep(2);
+			net_read(0, msg, 32);
+			if(msg[0] == '#') {
+			char date[10], time[10];
+				date[0] = msg[1]; date[1] = msg[2]; date[2] = '/';
+				date[3] = msg[3]; date[4] = msg[4]; date[5] = '/';
+				date[6] = msg[5]; date[7] = msg[6]; date[8] = 0;
+				
+				time[0] = msg[7]; time[1] = msg[8]; time[2] = ':';
+				time[3] = msg[9]; time[4] = msg[10]; time[5] = ':';
+				time[6] = msg[11]; time[7] = msg[12]; time[8] = 0;
+
+				set_date(date);
+				set_time(time);
+			}				
+			rtu_xmit_data(msg);
+			net_write(0, msg, 0x152*2);
+			net_close(0);
+		}	else {
+			send_sms(rtu_param.phone1,"connect server timeout.");
+		}	
+	}		
 }

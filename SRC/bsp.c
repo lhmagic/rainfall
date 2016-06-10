@@ -1,7 +1,9 @@
 #include	"bsp.h"
 
 void board_init(void) {
+	iwdg_init();
 	gpio_init();
+	adc_init();
 	rtc_init();
 	usart1_init(9600);
 	usart2_init(115200);
@@ -12,8 +14,10 @@ void board_init(void) {
 
 void sleep(uint16_t sec) {
 uint16_t i;
-	for(i=0; i<sec; i++) 
+	for(i=0; i<sec; i++) {
 		delay(1000);
+		IWDG_REFRESH();
+	}
 }
 
 void delay(uint16_t ms) {
@@ -32,6 +36,15 @@ void delay(uint16_t ms) {
 	RCC->APB1ENR &= ~RCC_APB1ENR_TIM14EN;
 }
 
+void iwdg_init(void) {
+	IWDG->KR = 0xCCCC; 
+	IWDG->KR = 0x5555;
+	IWDG->PR = IWDG_PR_PR; 
+	IWDG->RLR = (40000/256)*2; 
+	while (IWDG->SR) ;
+	IWDG->KR = 0xAAAA; 
+}
+
 void gpio_init(void) {
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
@@ -47,6 +60,9 @@ void gpio_init(void) {
 	GPIOF->MODER |= GPIO_MODER_MODER7_0;
 	
 	GPIOB->ODR &= ~GPIO_ODR_12;		//PWR LED
+	
+	GPIOB->MODER |= GPIO_MODER_MODER1;
+	GPIOB->PUPDR &= ~GPIO_PUPDR_PUPDR1;	//PB1 AIN
 	
 	//PA0 INTERRUPT CONFIGURATION
 	EXTI->IMR |= EXTI_IMR_IM0;

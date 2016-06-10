@@ -6,6 +6,7 @@
 #define		RCV_CFG_LEN					375
 #define		READ_CFG_LEN				8
 #define		RSP_CFG_LEN					431
+#define		WRITE_UID_LEN				25
 
 typedef struct {
 	uint8_t upload_period;
@@ -39,7 +40,8 @@ typedef	struct {
 } s_rcv_cfg;
 
 uint8_t read_local_param(void);
-void rs485_handle(char *buf, uint16_t cnt) ;
+void rs485_handle(char *buf, uint16_t cnt);
+uint8_t update_n_wirte_uid(char *buf);
 uint8_t parse_param(char *buf, uint16_t cnt);
 void construct_rsp(char *buf, uint16_t len);
 uint8_t is_time_to_report(void);
