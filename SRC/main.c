@@ -117,7 +117,7 @@ char header[] = "460029125715486";
 			net_write(0, msg, 0x152*2);
 			net_close(0);
 		}	else {
-			send_sms(rtu_param.phone1,"connect server timeout.");
+//			send_sms(rtu_param.phone1,"connect server timeout.");
 		}	
 	}		
 }
