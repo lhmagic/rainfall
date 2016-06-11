@@ -82,7 +82,7 @@ uint32_t dr, tr;
 	time[2] = (dr>>0 ) & 0xFF;
 	time[3] = (tr>>16) & 0xFF;
 	time[4] = (tr>>8 ) & 0xFF;
-	time[5] = (dr>>0 ) & 0xFF;
+	time[5] = (tr>>0 ) & 0xFF;
 	
 	return time;
 }

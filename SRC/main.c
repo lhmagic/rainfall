@@ -14,21 +14,21 @@ static uint16_t get_solar_volt(void);
 
 int main(void) {
 char msg[RTU_MSG_SIZE];
-uint16_t bat_volt;	
 	
+	RCC->APB2ENR |= RCC_APB2ENR_DBGMCUEN;
+	DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_IWDG_STOP;
 	board_init();
 	read_param_n_net_puts(msg);
 	
 	while(1) {
 		IWDG_REFRESH();
 		
-		bat_volt = get_bat_volt();
-		if((bat_volt > 115) || (bat_volt < 140)) {
+		if(get_bat_volt() < 115) {
 			CHARGE_ON();
-		} else {
+		} else if(get_bat_volt() > 140) {
 			CHARGE_OFF();
 		}
-		
+				
 		if(is_time_to_report() || is_ring(rtu_param.phone1)) {
 			read_param_n_net_puts(msg);
 		}
@@ -114,7 +114,7 @@ char header[] = "460029125715486";
 			net_puts(0, header);
 			sleep(2);
 			net_read(0, msg, 32);
-			if(msg[0] == '#') {
+			if(0/*msg[0] == '#'*/) {
 			char date[10], time[10];
 				date[0] = msg[1]; date[1] = msg[2]; date[2] = '/';
 				date[3] = msg[3]; date[4] = msg[4]; date[5] = '/';

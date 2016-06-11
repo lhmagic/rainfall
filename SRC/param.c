@@ -46,18 +46,18 @@ uint8_t	ret;
 }
 
 void rs485_handle(char *buf, uint16_t cnt) {
+char rsp[] = "\x01\x10\x00\x00\x00\x92\x02\x00";
 	
 	switch (cnt) {
 		case RCV_CFG_LEN:
-//			if((buf[0] != 0x03) && (buf[1] != 0x10))
-//				return;
 			flash_write(PARAM_SAVE_ADDR, (uint8_t *)buf, cnt);
 			parse_param(buf, cnt);
-			xputs("\x01\x10\x00\x00\x00\x92\x02\x00");
+			
+			for(cnt=0; cnt<8; cnt++) {
+				xputc(rsp[cnt]);
+			}
 			break;
-		case READ_CFG_LEN:
-//			if((buf[0] != 0x03) && (buf[1] != 0x03))
-//				return;			
+		case READ_CFG_LEN:	
 			if(memcmp(buf, "\x03\x03\x00\x00\x00\xA6\xC4\x52", cnt) == 0) {
 				construct_rsp(buf, cnt);
 				//response code in construct_rsp function.
@@ -67,6 +67,14 @@ void rs485_handle(char *buf, uint16_t cnt) {
 			//01 10 	0A 	dev_num 	rtu_num crc16
 			update_n_wirte_uid(buf);
 			break;
+		case 4:
+			if(memcmp(buf, "TIME", 4) == 0) {
+			char *time;
+				time = read_bcd_time();
+				for(cnt=0; cnt<6;cnt++) {
+					xputc(time[cnt]);
+				}
+			}
 		default:
 			break;
 	}

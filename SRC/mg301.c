@@ -99,6 +99,7 @@ uint8_t retry, ret=1;
 	sprintf(str, "%s=%d\n", "AT^SISO", id);
 	
 	for(retry=0; retry<3; retry++) {
+		mg_cmd("AT+CHUP");
 		mg_cmd(str);
 		sleep(3);
 		mg_cmd("AT^SISO?");
@@ -118,6 +119,7 @@ uint16_t i;
 	
 	sprintf(sisw, "%s=%d,%d\n", "AT^SISW", id, len);
 	for(retry=0; retry<3; retry++) {
+		mg_cmd("AT+CHUP");
 		mg_cmd(sisw);
 		for(i=0; i<len; i++) {
 			yputc(buf[i]);
@@ -140,6 +142,7 @@ uint8_t retry, ret=1;
 	len = strlen(msg);
 	sprintf(sisw, "%s=%d,%d\n", "AT^SISW", id, len);
 	for(retry=0; retry<3; retry++) {
+		mg_cmd("AT+CHUP");
 		mg_cmd(sisw);
 		mg_cmd(msg);
 		sleep(3);
@@ -158,6 +161,7 @@ char read[32]= "AT^SISR=0,", temp[32];
 char *p;	
 	
 	for(retry=0; retry<3; retry++) {
+		mg_cmd("AT+CHUP");
 		mg_cmd("AT^SISR=0,0");
 		if((p=strstr(get_usart2_buf(), "SISR: 0,")) != NULL) {
 			p += strlen("SISR: 0,");
