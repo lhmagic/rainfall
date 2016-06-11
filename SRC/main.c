@@ -114,7 +114,7 @@ char header[] = "460029125715486";
 			net_puts(0, header);
 			sleep(2);
 			net_read(0, msg, 32);
-			if(0/*msg[0] == '#'*/) {
+			if(msg[0] == '#') {
 			char date[10], time[10];
 				date[0] = msg[1]; date[1] = msg[2]; date[2] = '/';
 				date[3] = msg[3]; date[4] = msg[4]; date[5] = '/';
