@@ -45,5 +45,6 @@ uint8_t update_n_wirte_uid(char *buf);
 uint8_t parse_param(char *buf, uint16_t cnt);
 void construct_rsp(char *buf, uint16_t len);
 uint8_t is_time_to_report(void);
+uint8_t get_rainfall_spec(void);
 
 #endif		//__PARAM_H__

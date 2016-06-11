@@ -17,6 +17,14 @@ static const uint8_t upload_time_table[][2] = {
 	8, 1,
 };
 
+static const uint8_t rainfall_spec_table[5] = {
+	0, 1, 2, 5, 10
+};
+
+uint8_t get_rainfall_spec(void) {
+	return rainfall_spec_table[rtu_param.rainfall_spec];
+}
+
 uint8_t is_time_to_report(void) {
 	if(is_hour_flag()) {
 	uint8_t start, interval, hour;
@@ -52,6 +60,7 @@ char rsp[] = "\x01\x10\x00\x00\x00\x92\x02\x00";
 		case RCV_CFG_LEN:
 			flash_write(PARAM_SAVE_ADDR, (uint8_t *)buf, cnt);
 			parse_param(buf, cnt);
+			clr_pulse_cnt();
 			
 			for(cnt=0; cnt<8; cnt++) {
 				xputc(rsp[cnt]);

@@ -92,3 +92,7 @@ uint32_t get_pulse_cnt(void) {
 void clr_pulse_cnt(void) {
 	RTC->BKP0R = 0;
 }
+
+uint32_t get_rainfall(void) {
+	return get_pulse_cnt() * get_rainfall_spec();
+}

@@ -52,7 +52,7 @@ uint16_t solar_volt=0, bat_volt;
 s_rcv_cfg *cfg;
 	
 	cfg = (s_rcv_cfg *)PARAM_SAVE_ADDR;
-	p_cnt = __REV(get_pulse_cnt());
+	p_cnt = __REV(get_rainfall());
 	time = read_bcd_time();
 	rssi = get_rssi();
 	rssi = ((rssi/10)<<4)+rssi%10;

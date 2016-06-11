@@ -49,5 +49,6 @@ uint32_t get_pulse_cnt(void);
 void clr_pulse_cnt(void);
 void gpio_init(void);
 void iwdg_init(void);
+uint32_t get_rainfall(void);
 
 #endif		//__BSP_H__
