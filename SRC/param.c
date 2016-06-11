@@ -69,10 +69,15 @@ char rsp[] = "\x01\x10\x00\x00\x00\x92\x02\x00";
 			break;
 		case 4:
 			if(memcmp(buf, "TIME", 4) == 0) {
+			uint32_t t;
 			char *time;
 				time = read_bcd_time();
 				for(cnt=0; cnt<6;cnt++) {
 					xputc(time[cnt]);
+				}
+				t = get_pulse_cnt();
+				for(cnt=0; cnt<4; cnt++) {
+					xputc(*((char *)&t+cnt));
 				}
 			}
 		default:

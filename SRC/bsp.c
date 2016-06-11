@@ -64,6 +64,9 @@ void gpio_init(void) {
 	GPIOB->MODER |= GPIO_MODER_MODER1 | GPIO_MODER_MODER0;
 	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR1 | GPIO_PUPDR_PUPDR0);	//PB0 PB1 AIN
 	
+	GPIOA->MODER &= GPIO_MODER_MODER0;
+	GPIOA->PUPDR &= GPIO_PUPDR_PUPDR0;
+	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_1;
 	//PA0 INTERRUPT CONFIGURATION
 	EXTI->IMR |= EXTI_IMR_IM0;
 	SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA;
@@ -75,8 +78,10 @@ void gpio_init(void) {
 void pulse_cnt_handle(void) {
 	if(EXTI->PR & EXTI_PR_PIF0) {
 		EXTI->PR |= EXTI_PR_PIF0;	
-		//RTC->BKP0R is used to save pulse count
-		RTC->BKP0R++;
+		if((GPIOA->IDR & GPIO_IDR_0) == 0) {
+			//RTC->BKP0R is used to save pulse count
+			RTC->BKP0R++;
+		}
 	}
 }
 
