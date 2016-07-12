@@ -30,6 +30,11 @@ char msg[RTU_MSG_SIZE];
 		}
 				
 		if(is_time_to_report() || is_ring(rtu_param.phone1)) {
+			tim15_disable();
+			read_param_n_net_puts(msg);
+		}
+		
+		if(is_raining()) {
 			read_param_n_net_puts(msg);
 		}
 		

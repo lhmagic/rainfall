@@ -36,6 +36,45 @@ void delay(uint16_t ms) {
 	RCC->APB1ENR &= ~RCC_APB1ENR_TIM14EN;
 }
 
+void tim15_init(uint16_t sec) {
+	RCC->APB2ENR |= RCC_APB2ENR_TIM15EN;
+	TIM15->PSC = 64000;
+	TIM15->ARR = 125*sec;
+	
+	TIM15->CNT = 1;
+	TIM15->CR1 |= TIM_CR1_URS;
+	TIM15->SR &= ~TIM_SR_UIF;
+	TIM15->CR1 |= TIM_CR1_CEN;
+	TIM15->DIER |= TIM_DIER_UIE;
+//	TIM15->SR &= ~TIM_SR_UIF;
+//	NVIC_ClearPendingIRQ(TIM15_IRQn);
+	NVIC_SetPriority(TIM15_IRQn, 0);
+	NVIC_EnableIRQ(TIM15_IRQn);	
+}
+
+void tim15_disable(void) {
+	TIM15->CR1 &= ~TIM_CR1_CEN;
+	RCC->APB2ENR &= ~RCC_APB2ENR_TIM15EN;
+}
+
+void tim15_handle(void) {
+	if(TIM15->SR & TIM_SR_UIF) {
+		TIM15->SR &= ~TIM_SR_UIF;
+		set_raining();
+	}		
+}
+
+static uint8_t raining;
+uint8_t is_raining(void) {
+uint8_t ret = raining;	
+	raining = 0;
+	return ret;
+}
+
+void set_raining(void) {
+	raining = 1;
+}
+
 void iwdg_init(void) {
 	IWDG->KR = 0xCCCC; 
 	IWDG->KR = 0x5555;
@@ -64,8 +103,8 @@ void gpio_init(void) {
 	GPIOB->MODER |= GPIO_MODER_MODER1 | GPIO_MODER_MODER0;
 	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR1 | GPIO_PUPDR_PUPDR0);	//PB0 PB1 AIN
 	
-	GPIOA->MODER &= GPIO_MODER_MODER0;
-	GPIOA->PUPDR &= GPIO_PUPDR_PUPDR0;
+	GPIOA->MODER &= ~GPIO_MODER_MODER0;
+	GPIOA->PUPDR &= ~GPIO_PUPDR_PUPDR0;
 	GPIOA->PUPDR |= GPIO_PUPDR_PUPDR0_1;
 	//PA0 INTERRUPT CONFIGURATION
 	EXTI->IMR |= EXTI_IMR_IM0;
@@ -81,6 +120,8 @@ void pulse_cnt_handle(void) {
 		if((GPIOA->IDR & GPIO_IDR_0) == 0) {
 			//RTC->BKP0R is used to save pulse count
 			RTC->BKP0R++;
+			set_raining();
+			tim15_init(300);
 		}
 	}
 }

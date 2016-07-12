@@ -15,6 +15,7 @@ uint8_t is_rcv_nwtime(void);
 void update_time(void);
 uint8_t set_profile(uint8_t id, const char *server, const char *apn, const char *user, const char *passwd);
 uint8_t net_open(uint8_t id);
+uint8_t is_net_connected(uint8_t id);
 uint8_t net_write(uint8_t id, const char *buf, uint16_t len);
 uint8_t net_puts(uint8_t id, const char *msg);
 uint8_t net_read(uint8_t id, char *buf, uint16_t len);

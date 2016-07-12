@@ -3,9 +3,8 @@
 void flash_write(uint32_t addr, uint8_t *data, uint16_t len) {
 volatile uint16_t *paddr = (volatile uint16_t *)addr;
 	
-	if(len%2 == 1) {
-		len = (len+1)/2;
-	}
+	len += 1;
+	len /= 2;
 	
 	FLASH->KEYR = 0x45670123;
 	FLASH->KEYR = 0xCDEF89AB;

@@ -44,6 +44,11 @@
 void board_init(void);
 void sleep(uint16_t sec);
 void delay(uint16_t ms);
+void tim15_init(uint16_t sec);
+void tim15_disable(void);
+void tim15_handle(void);
+uint8_t is_raining(void) ;
+void set_raining(void);
 void pulse_cnt_handle(void);
 uint32_t get_pulse_cnt(void);
 void clr_pulse_cnt(void);

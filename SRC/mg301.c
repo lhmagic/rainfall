@@ -16,7 +16,7 @@ void mg_init(void) {
 void mg_cmd(const char *str) {
 	usart2_buf_clr();
 	yputs(str);
-	yputs("\n");
+	yputs("\r\n");
 	delay(CMD_WAIT_TIME);
 }
 
@@ -110,6 +110,28 @@ uint8_t retry, ret=1;
 		sleep(5);
 	}
 	return ret;
+}
+
+uint8_t is_net_connected(uint8_t id) {
+char findstr[32];
+char *p;
+uint8_t i, connected=0;	
+	sprintf(findstr, "%s %d", "^SISO:", id);
+	mg_cmd("AT^SISO?");
+	if((p=strstr(get_usart2_buf(), findstr)) != NULL) {
+		for(i=0; i<128; i++) {
+			if(p[i] == 0x0a){
+				p[i] = 0x00;
+				break;
+			}
+		}
+		sprintf(findstr, "%s", "\"4\",\"2\"");
+		if(strstr(p, findstr)) {
+			connected=1;
+		}
+	}		
+	
+	return connected;
 }
 
 uint8_t net_write(uint8_t id, const char *buf, uint16_t len) {

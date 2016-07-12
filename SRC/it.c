@@ -15,3 +15,7 @@ void USART1_IRQHandler(void) {
 void USART2_IRQHandler(void) {
 	usart2_rx_handle();
 }
+
+void TIM15_IRQHandler(void) {
+	tim15_handle();
+}
