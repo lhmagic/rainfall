@@ -491,6 +491,12 @@
       </component>
     </components>
     <files>
+      <file attr="config" category="sourceAsm" condition="Compiler ARMCC" name="Device\Source\ARM\startup_stm32f051.s" version="1.5.0">
+        <instance index="0" removed="1">RTE\Device\STM32F051C8\startup_stm32f051.s</instance>
+        <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="1.5.0" condition="STM32F051_58_71 CMSIS"/>
+        <package name="STM32F0xx_DFP" schemaVersion="1.2" url="http://www.keil.com/pack/" vendor="Keil" version="1.4.0"/>
+        <targetInfos/>
+      </file>
       <file attr="config" category="sourceAsm" condition="Compiler ARMCC" name="Device\Source\ARM\startup_stm32f051x8.s" version="2.2.3">
         <instance index="0">RTE\Device\STM32F051C8\startup_stm32f051x8.s</instance>
         <component Cclass="Device" Cgroup="Startup" Cvendor="Keil" Cversion="2.2.3" condition="STM32F051x8 CMSIS"/>

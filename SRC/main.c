@@ -14,10 +14,14 @@ static uint16_t get_solar_volt(void);
 
 int main(void) {
 char msg[RTU_MSG_SIZE];
-	
+
 	RCC->APB2ENR |= RCC_APB2ENR_DBGMCUEN;
 	DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_IWDG_STOP;
+	DBGMCU->APB2FZ |= DBGMCU_APB2_FZ_DBG_TIM15_STOP;
 	board_init();
+	if(is_rcv_nwtime()) {
+		update_time();
+	}	
 	read_param_n_net_puts(msg);
 	
 	while(1) {
@@ -142,9 +146,9 @@ char header[] = "460029125715486";
 }
 
 static uint16_t get_bat_volt(void) {
-	return get_adc(ADC_CHSELR_CHSEL9)*3.3/409.5*13;
+	return get_adc(ADC_CHSELR_CHSEL9)*3.3/409.5*5.7;
 }
 
 static uint16_t get_solar_volt(void) {
-	return get_adc(ADC_CHSELR_CHSEL8)*3.3/409.5*13;
+	return get_adc(ADC_CHSELR_CHSEL8)*3.3/409.5*17.5;
 }
