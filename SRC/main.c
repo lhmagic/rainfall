@@ -19,6 +19,7 @@ char msg[RTU_MSG_SIZE];
 	DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_IWDG_STOP;
 	DBGMCU->APB2FZ |= DBGMCU_APB2_FZ_DBG_TIM15_STOP;
 	board_init();
+	read_local_param();
 	
 	while(1) {
 		IWDG_REFRESH();
@@ -135,7 +136,7 @@ char header[] = "460029125715486";
 
 				set_date(date);
 				set_time(time);
-			}				
+			}
 			rtu_xmit_data(msg);
 			net_write(0, msg, 0x152*2);
 			net_close(0);

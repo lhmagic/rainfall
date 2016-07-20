@@ -9,7 +9,7 @@ static const char unknown_data[36] = "\x00\x00\x88\xA4\x00\x04\x00\x7B\x7F\xBF\x
 
 static const uint8_t upload_time_table[][2] = {
 //start, interval
-	0, 0,
+	8, 1,
 	8, 12,
 	8, 8,
 	8, 6,
@@ -26,17 +26,16 @@ uint8_t get_rainfall_spec(void) {
 }
 
 uint8_t is_time_to_report(void) {
+uint8_t i;	
 	if(is_hour_flag()) {
 	uint8_t start, interval, hour;
 	start = upload_time_table[rtu_param.upload_period][0];
 	interval = upload_time_table[rtu_param.upload_period][1];
 	hour = read_hour();
-		while(start < 24) {
-			if(start%hour != 0) {
-				start += interval;
-			} else {
+		for(i=0; i<24; i+=interval) {
+			if((start+i)%24 == hour) {
 				tim15_disable();		//平安报时间到时停止每隔5分钟上传数据
-				return 1;
+				return 1;			
 			}
 		}
 	}

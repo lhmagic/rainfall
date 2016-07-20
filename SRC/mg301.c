@@ -193,7 +193,7 @@ char *p;
 				sprintf(temp, "%d\n", num);
 				strcat(read, temp);
 				mg_cmd(read);
-				if((p = strstr(get_usart2_buf(), "SISR:")) != NULL) {
+				if((p = strstr(get_usart2_buf(), "SR:")) != NULL) {
 					while(*p++ != '\n');
 					while(num--) {
 						*buf++ = *p++;

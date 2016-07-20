@@ -37,6 +37,7 @@ uint32_t time;
 	
 	RTC->ISR &= ~RTC_ISR_INIT;
 	RTC->WPR = 0x00;
+	RTC->WPR = 0x55;
 }
 
 /**********************************
@@ -60,6 +61,7 @@ uint32_t date;
 	
 	RTC->ISR &= ~RTC_ISR_INIT;
 	RTC->WPR = 0x00;
+	RTC->WPR = 0x55;
 }
 
 /**********************************
@@ -113,7 +115,7 @@ static void set_rtc_alarm(void) {
 	EXTI->FTSR |= EXTI_FTSR_FT17;	
 	
 	RTC->WPR = 0x00;
-	RTC->WPR = 0x00;	
+	RTC->WPR = 0x55;	
 }
 
 /**********************************
