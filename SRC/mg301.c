@@ -1,14 +1,10 @@
 #include	"mg301.h"
 
 void mg_init(void) {
-	MG301_PWON();
-	sleep(15);
-	
-	if(is_rcv_nwtime()) {
-		update_time();
-	}
-	
-	sleep(5);
+	MG301_HALT();
+	sleep(1);
+	MG301_PWON();	
+	sleep(1);
 	
 	disable_echo();
 }

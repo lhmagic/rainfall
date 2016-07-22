@@ -35,6 +35,7 @@ uint8_t is_time_to_report(void) {
 			if(start%hour != 0) {
 				start += interval;
 			} else {
+				tim15_disable();		//平安报时间到时停止每隔5分钟上传数据
 				return 1;
 			}
 		}

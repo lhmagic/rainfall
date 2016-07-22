@@ -32,18 +32,17 @@ char msg[RTU_MSG_SIZE];
 		} else if(get_bat_volt() > 140) {
 			CHARGE_OFF();
 		}
-				
-		if(is_time_to_report() || is_ring(rtu_param.phone1)) {
-			tim15_disable();
-			read_param_n_net_puts(msg);
-		}
-		
-		if(is_raining()) {
-			read_param_n_net_puts(msg);
-		}
 		
 		if(is_rcv_nwtime()) {
 			update_time();
+		}	
+				
+		if(is_raining() || is_time_to_report()) {
+			read_param_n_net_puts(msg);
+		}
+		
+		if(is_ring(rtu_param.phone1)) {
+			
 		}
 		
 		if(is_usart1_rx_done()) {
@@ -117,7 +116,7 @@ void read_param_n_net_puts(char *msg) {
 char header[] = "460029125715486";
 	
 	if(!is_gm301_on()) {
-		NVIC_SystemReset();
+		mg_init();
 	}
 	
 	if(read_local_param() == 0) {
