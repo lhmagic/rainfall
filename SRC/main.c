@@ -42,7 +42,7 @@ char msg[RTU_MSG_SIZE];
 		}
 		
 		if(is_ring(rtu_param.phone1)) {
-			
+			read_param_n_net_puts(msg);
 		}
 		
 		if(is_usart1_rx_done()) {
