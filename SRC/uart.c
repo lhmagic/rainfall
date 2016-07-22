@@ -97,7 +97,7 @@ void usart2_init(uint32_t baudrate) {
 	GPIOA->AFR[0] |= ((1<<8)|(1<<12));
 	
 	USART2->BRR = SYSCLK/baudrate;
-	USART2->CR2 |= USART_CR2_SWAP;
+//	USART2->CR2 |= USART_CR2_SWAP;
 	USART2->CR1 |= (USART_CR1_RXNEIE | USART_CR1_TE | USART_CR1_RE | USART_CR1_UE);
 	NVIC_SetPriority(USART2_IRQn, 1);
 	NVIC_EnableIRQ(USART2_IRQn);
