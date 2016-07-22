@@ -22,6 +22,7 @@ void mg_cmd(const char *str) {
 
 uint8_t is_gm301_on(void) {
 	mg_cmd("AT");
+	mg_cmd("AT");
 	if(strstr(get_usart2_buf(), "OK")) {
 		return 1;
 	}

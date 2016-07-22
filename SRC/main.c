@@ -116,6 +116,10 @@ s_rcv_cfg *cfg;
 void read_param_n_net_puts(char *msg) {
 char header[] = "460029125715486";
 	
+	if(!is_gm301_on()) {
+		NVIC_SystemReset();
+	}
+	
 	if(read_local_param() == 0) {
 		set_profile(0, rtu_param.ip1, rtu_param.apn, rtu_param.uname, rtu_param.passwd);
 		
