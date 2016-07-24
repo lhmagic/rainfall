@@ -19,10 +19,6 @@ char msg[RTU_MSG_SIZE];
 	DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_IWDG_STOP;
 	DBGMCU->APB2FZ |= DBGMCU_APB2_FZ_DBG_TIM15_STOP;
 	board_init();
-	if(is_rcv_nwtime()) {
-		update_time();
-	}	
-	read_param_n_net_puts(msg);
 	
 	while(1) {
 		IWDG_REFRESH();
@@ -35,6 +31,7 @@ char msg[RTU_MSG_SIZE];
 		
 		if(is_rcv_nwtime()) {
 			update_time();
+			usart2_buf_clr();
 		}	
 				
 		if(is_raining() || is_time_to_report()) {
@@ -105,7 +102,7 @@ s_rcv_cfg *cfg;
 	memcpy(msg+0x13E*2, cfg->phone[3], 40);
 	memcpy(msg+0x148*2, cfg->phone[4], 40);
 	
-	for(i=0; i<RTU_MSG_SIZE; i++) {
+	for(i=0xB0*2; i<RTU_MSG_SIZE; i++) {
 		if((msg[i]=='\r') || (msg[i]=='\n')) {
 			msg[i] = ' ';
 		}
