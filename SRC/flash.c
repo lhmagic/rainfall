@@ -11,7 +11,7 @@ volatile uint16_t *paddr = (volatile uint16_t *)addr;
 	
 	//PAGE ERASE
 	FLASH->CR |= FLASH_CR_PER;
-	FLASH->AR |= addr;
+	FLASH->AR = addr;
 	FLASH->CR |= FLASH_CR_STRT;
 	while((FLASH->SR & FLASH_SR_BSY) != 0);
 	if((FLASH->SR & FLASH_SR_EOP)!=0) {

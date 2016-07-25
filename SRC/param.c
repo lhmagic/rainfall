@@ -109,9 +109,7 @@ uint8_t temp[20];
 	
 	memcpy(temp, buf+3, 20);
 	flash_write(UID_SAVE_ADDR, temp, 20);
-	
 	xputs("\x01\x10\x0A\xAD\xC7");
-	
 	return 0;
 }
 
