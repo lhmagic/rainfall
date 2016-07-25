@@ -53,8 +53,8 @@ uint8_t hour;
 		time[1] = ((hour%24)%10)+'0';
 		time[8] = 0;
 		date[8] = 0;
-		set_time(time);
 		set_date(date);
+		set_time(time);
 		
 		if(hour >= 24) {
 			set_time("23:59:59");

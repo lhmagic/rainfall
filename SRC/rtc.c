@@ -30,6 +30,7 @@ uint32_t time;
 	RTC->WPR = 0xCA;
 	RTC->WPR = 0x53;
 	
+	RTC->CR |= RTC_CR_BYPSHAD;
 	RTC->ISR |= RTC_ISR_INIT;
 	while(!(RTC->ISR & RTC_ISR_INITF));
 	RTC->PRER = 0x7F00FF;
@@ -53,10 +54,10 @@ uint32_t date;
 	
 	RTC->WPR = 0xCA;
 	RTC->WPR = 0x53;
-	
+	RTC->CR |= RTC_CR_BYPSHAD;
 	RTC->ISR |= RTC_ISR_INIT;
 	while(!(RTC->ISR & RTC_ISR_INITF));
-	RTC->PRER = 32767;
+	RTC->PRER = 0x7F00FF;
 	RTC->DR = date;
 	
 	RTC->ISR &= ~RTC_ISR_INIT;
