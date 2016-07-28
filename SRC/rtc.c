@@ -126,7 +126,6 @@ void rtc_hour_irq_handle(void) {
 	if(RTC->ISR & RTC_ISR_ALRAF) {
 		RTC->ISR &= ~RTC_ISR_ALRAF;
 		EXTI->PR |= EXTI_PR_PIF17;	
-		
 		set_hour_flag();
 	}
 }

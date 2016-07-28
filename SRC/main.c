@@ -36,6 +36,7 @@ char msg[RTU_MSG_SIZE];
 		}	
 				
 		if(is_raining() || is_time_to_report()) {
+			xputs("read n puts\r\n");
 			read_param_n_net_puts(msg);
 		}
 		
@@ -112,7 +113,7 @@ s_rcv_cfg *cfg;
 
 void read_param_n_net_puts(char *msg) {
 char header[] = "460029125715486";
-	
+
 	if(!is_gm301_on()) {
 		mg_init();
 	}
@@ -141,9 +142,10 @@ char header[] = "460029125715486";
 			net_write(0, msg, 0x152*2);
 			net_close(0);
 		}	else {
+			xputs("open failed.\r\n");
 //			send_sms(rtu_param.phone1,"connect server timeout.");
 		}	
-	}		
+	}
 }
 
 static uint16_t get_bat_volt(void) {

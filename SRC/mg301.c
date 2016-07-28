@@ -4,7 +4,7 @@ void mg_init(void) {
 	MG301_HALT();
 	sleep(1);
 	MG301_PWON();	
-	sleep(1);
+	sleep(15);
 	
 	disable_echo();
 }
@@ -18,6 +18,7 @@ void mg_cmd(const char *str) {
 
 uint8_t is_gm301_on(void) {
 	mg_cmd("AT");
+	sleep(1);
 	mg_cmd("AT");
 	if(strstr(get_usart2_buf(), "OK")) {
 		return 1;
@@ -95,7 +96,7 @@ uint8_t retry, ret=1;
 	
 	sprintf(str, "%s=%d\n", "AT^SISO", id);
 	
-	for(retry=0; retry<2; retry++) {
+	for(retry=0; retry<3; retry++) {
 		mg_cmd("AT+CHUP");
 		mg_cmd(str);
 		sleep(3);
@@ -104,7 +105,7 @@ uint8_t retry, ret=1;
 			ret = 0;
 			break;
 		}
-		sleep(2);
+		sleep(3);
 	}
 	return ret;
 }
