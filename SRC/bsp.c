@@ -7,6 +7,9 @@ void board_init(void) {
 	rtc_init();
 	usart1_init(9600);
 	usart2_init(115200);
+	spi_flash_init();
+	sleep(1);
+	
 	PWR_LED_ON();
 	CHARGE_ON();
 	mg_init();
@@ -14,10 +17,12 @@ void board_init(void) {
 
 void sleep(uint16_t sec) {
 uint16_t i;
+	LED_OFF();
 	for(i=0; i<sec; i++) {
 		delay(1000);
 		IWDG_REFRESH();
 	}
+	LED_ON();
 }
 
 void delay(uint16_t ms) {
@@ -92,6 +97,9 @@ void gpio_init(void) {
 	
 	GPIOA->MODER |= GPIO_MODER_MODER15_0;
 	GPIOA->ODR |= GPIO_ODR_15;
+	
+	GPIOA->MODER |= (GPIO_MODER_MODER4_0 | GPIO_MODER_MODER5_1 | GPIO_MODER_MODER6_1 | GPIO_MODER_MODER7_1); 
+	GPIOA->ODR |= GPIO_ODR_4;
 	
 	GPIOB->MODER |= (GPIO_MODER_MODER4_0 | GPIO_MODER_MODER5_0 |\
 									 GPIO_MODER_MODER6_0 | GPIO_MODER_MODER9_0 | GPIO_MODER_MODER12_0);

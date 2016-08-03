@@ -465,6 +465,26 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>SPI</GroupName>
+          <Files>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\SRC\spi.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>M25P16</GroupName>
+          <Files>
+            <File>
+              <FileName>m25p16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\SRC\m25p16.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>::CMSIS</GroupName>
         </Group>
         <Group>

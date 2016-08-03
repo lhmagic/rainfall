@@ -19,6 +19,15 @@ typedef struct {
 } s_param;
 
 typedef	struct {
+	uint8_t flag;
+	uint8_t rssi;
+	char time[6];
+	uint32_t 	rainfall;
+	uint16_t	b_volt;
+	uint16_t	s_volt;
+} s_var_data;
+
+typedef	struct {
 	uint8_t header[2];
 	uint8_t send_time[2];
 	uint8_t rainfall_spec[2];

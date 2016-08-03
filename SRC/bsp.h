@@ -13,6 +13,8 @@
 #include	"param.h"
 #include	"mg301.h"
 #include	"adc.h"
+#include	"spi.h"
+#include	"m25p16.h"
 
 
 #define		SYSCLK								8000000
@@ -37,6 +39,9 @@
 
 #define		PWR_LED_ON()				(GPIOB->ODR &= ~GPIO_ODR_12)
 #define		PWR_LED_OFF()				(GPIOB->ODR |= GPIO_ODR_12)
+
+#define		LED_ON()				(GPIOB->ODR &= ~GPIO_ODR_9)
+#define		LED_OFF()				(GPIOB->ODR |= GPIO_ODR_9)
 
 #define		IWDG_REFRESH()			IWDG->KR = 0xAAAA
 
