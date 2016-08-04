@@ -225,6 +225,7 @@ uint8_t server_online=0;
 		return;
 	
 	for(i=0; i<MAX_PAGE; i++) {
+		IWDG_REFRESH();
 		cmd_read_page(i, buf);
 		record = (s_var_data *)buf;
 		if(record[i].flag == 0xFF) {
