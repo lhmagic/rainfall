@@ -48,7 +48,6 @@ char msg[RTU_MSG_SIZE];
 		}
 		
 		if(is_usart1_rx_done()) {
-			puts_local_records(msg);
 			rs485_handle(get_usart1_buf(), get_usart1_rx_cnt());
 			usart1_buf_clr();
 		}
