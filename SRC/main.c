@@ -12,6 +12,7 @@ static void read_param_n_net_puts(char *msg);
 static uint16_t get_bat_volt(void) ;
 static uint16_t get_solar_volt(void);
 static void puts_local_records(char *msg) ;
+static void read_page_pointer(void);
 
 
 int main(void) {
@@ -22,6 +23,7 @@ char msg[RTU_MSG_SIZE];
 	DBGMCU->APB2FZ |= DBGMCU_APB2_FZ_DBG_TIM15_STOP;	
 	board_init();
 	read_local_param();
+	read_page_pointer();
 	
 	while(1) {
 		IWDG_REFRESH();
@@ -46,6 +48,7 @@ char msg[RTU_MSG_SIZE];
 		}
 		
 		if(is_usart1_rx_done()) {
+			puts_local_records(msg);
 			rs485_handle(get_usart1_buf(), get_usart1_rx_cnt());
 			usart1_buf_clr();
 		}
@@ -166,6 +169,25 @@ int i, max_record;
 	}
 }
 
+static void read_page_pointer(void) {
+char buf[256];
+s_var_data *record;	
+int i;
+	
+	for(i=0; i<MAX_PAGE; i++) {
+		cmd_read_page(i, buf);
+		record = (s_var_data *)buf;
+		if(record[i].flag == 0xFF) {
+			RTC->BKP1R = i;
+			return;
+		}
+	}
+	
+	if(i >= MAX_PAGE) {
+		RTC->BKP1R = 0;
+	}
+}
+
 static void puts_local_records(char *msg) {
 char buf[PAGE_SIZE];
 int i, j, max_record;
@@ -206,13 +228,15 @@ uint8_t server_online=0;
 	for(i=0; i<MAX_PAGE; i++) {
 		cmd_read_page(i, buf);
 		record = (s_var_data *)buf;
-		if(record[i].flag != 0xA5) {
+		if(record[i].flag == 0xFF) {
+			break;
+		} else if(record[i].flag != 0xA5) {
 			continue;
 		}
 		
 		for(j=0; j<max_record; j++) {
 			if(record[j].flag == 0xA5) {
-				IWDG_REFRESH();
+				sleep(1);
 				rtu_xmit_data(msg, record[j].rainfall, record[j].time, record[j].rssi, record[j].b_volt, record[j].s_volt);
 				net_write(0, msg, 0x152*2);
 			}
@@ -223,6 +247,18 @@ uint8_t server_online=0;
 	}
 	
 	RTC->BKP1R = i;
+	
+	for(j=0; j<max_record; j++) {
+		if(local_record[j].flag == 0xA5) {
+			sleep(1);
+			rtu_xmit_data(msg, local_record[j].rainfall, local_record[j].time, local_record[j].rssi, local_record[j].b_volt, local_record[j].s_volt);
+			net_write(0, msg, 0x152*2);
+		} else {
+			break;
+		}
+	}
+	
+	memset((uint8_t *)local_record, 0, 256);
 	
 	net_close(0);
 }
