@@ -107,6 +107,17 @@ s_rcv_cfg *cfg;
 	}
 }
 
+uint8_t is_time_format(char *time) {
+	if((memcmp(time+0, "00", 2) < 0) || (memcmp(time+0, "99", 2) > 0)) return 0; //year
+	if((memcmp(time+2, "00", 2) < 0) || (memcmp(time+2, "19", 2) > 0)) return 0; //month
+	if((memcmp(time+4, "00", 2) < 0) || (memcmp(time+4, "39", 2) > 0)) return 0; //day
+	if((memcmp(time+6, "00", 2) < 0) || (memcmp(time+6, "29", 2) > 0)) return 0; //hour
+	if((memcmp(time+8, "00", 2) < 0) || (memcmp(time+8, "59", 2) > 0)) return 0; //minute
+	if((memcmp(time+10, "00", 2) < 0) || (memcmp(time+10, "59", 2) > 0)) return 0; //second
+	
+	return 1;
+}
+
 void read_param_n_net_puts(char *msg) {
 char header[] = "460029125715486";
 char send_success = 0;	
@@ -123,7 +134,7 @@ int i, max_record;
 			net_puts(0, header);
 			sleep(2);
 			net_read(0, msg, 32);
-			if(msg[0] == '#') {
+			if((msg[0] == '#') && is_time_format(msg+1)) {
 			char date[10], time[10];
 				date[0] = msg[1]; date[1] = msg[2]; date[2] = '/';
 				date[3] = msg[3]; date[4] = msg[4]; date[5] = '/';
