@@ -147,9 +147,14 @@ int i, max_record;
 				set_date(date);
 				set_time(time);
 			}
+			sleep(1);
 			rtu_xmit_data(msg, get_rainfall(), read_bcd_time(), get_rssi(), get_bat_volt(), get_solar_volt());
 			if(net_write(0, msg, 0x152*2) == 0) {
-				send_success = 1;
+			char net_msg[32];
+				net_read(0, net_msg, 32);
+				if(strstr(net_msg, "OK") != NULL) {
+					send_success = 1;
+				}
 			}
 			net_close(0);
 		}
