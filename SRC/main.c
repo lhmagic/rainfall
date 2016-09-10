@@ -40,10 +40,12 @@ char msg[RTU_MSG_SIZE];
 		}	
 				
 		if(is_raining() || is_time_to_report()) {
+			read_local_param();
 			read_param_n_net_puts(msg);
 		}
 		
 		if(is_ring(rtu_param.phone1)) {
+			read_local_param();
 			puts_local_records(msg);
 		}
 		
@@ -121,9 +123,11 @@ int i, max_record;
 	if(read_local_param() == 0) {
 		set_profile(0, rtu_param.ip1, rtu_param.apn, rtu_param.uname, rtu_param.passwd);
 		
+		net_open(0);
 		if(net_open(0) == 0) {
-			net_puts(0, header);
+			xputs("net open success.\r\n");
 			sleep(5);
+			net_puts(0, header);
 			net_read(0, msg, 32);
 			if(msg[0] == '#') {
 			char date[10], time[10];
@@ -142,9 +146,11 @@ int i, max_record;
 			rtu_xmit_data(msg, get_rainfall(), read_bcd_time(), get_rssi(), get_bat_volt(), get_solar_volt());
 			if(net_write(0, msg, 0x152*2) == 0) {
 			char net_msg[32];
+				xputs("write success\r\n");
 				sleep(5);
 				net_read(0, net_msg, 32);
 				if(strstr(net_msg, "OK") != NULL) {
+					xputs("received ok.\r\n");
 					send_success = 1;
 				}
 			}
@@ -152,6 +158,7 @@ int i, max_record;
 		}
 		
 		if(send_success == 0) {
+			xputs("save local\r\n.");
 			max_record = 256/sizeof(s_var_data);
 			if(local_record[max_record-1].flag == 0xA5) {
 				if((RTC->BKP1R % (SECTOR_SIZE/PAGE_SIZE)) == 0) {
