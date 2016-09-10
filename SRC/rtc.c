@@ -22,10 +22,24 @@ void rtc_init(void) {
  **********************************/
 void set_time(const char *time_str) {
 uint32_t time;
+uint8_t hour, min, sec, ht, hu, mt, mu, st, su;	
 	
-	time = ((time_str[0]-'0') << 20) | ((time_str[1]-'0') << 16) |\
-				 ((time_str[3]-'0') << 12) | ((time_str[4]-'0') << 8) | \
-				 ((time_str[6]-'0') << 4) | ((time_str[7]-'0') << 0);
+	if((memcmp(time_str+0, "00", 2) < 0) || (memcmp(time_str+0, "24", 2) > 0)) return; //hour
+	if((memcmp(time_str+3, "00", 2) < 0) || (memcmp(time_str+3, "60", 2) > 0)) return; //minute
+	if((memcmp(time_str+6, "00", 2) < 0) || (memcmp(time_str+6, "60", 2) > 0)) return; //second	
+	
+	ht = time_str[0]-'0';
+	hu = time_str[1]-'0';
+	mt = time_str[3]-'0';
+	mu = time_str[4]-'0';
+	st = time_str[6]-'0';
+	su = time_str[7]-'0';
+
+	hour = (ht<<4) + (hu&0x0F);
+	min = (mt<<4) + (mu&0x0F);
+	sec = (st<<4) + (su&0x0F);	
+	
+	time = (hour << 16) | (min << 8) | (sec << 0);	
 
 	RTC->WPR = 0xCA;
 	RTC->WPR = 0x53;
@@ -47,10 +61,24 @@ uint32_t time;
  **********************************/
 void set_date(const char *time_str) {
 uint32_t date;
+uint8_t year, month, day, yt, yu, mt, mu, dt, du;
 	
-	date = ((time_str[0]-'0') << 20) | ((time_str[1]-'0') << 16) |\
-				 ((time_str[3]-'0') << 12) | ((time_str[4]-'0') << 8) | \
-				 ((time_str[6]-'0') << 4) | ((time_str[7]-'0') << 0);
+	if((memcmp(time_str+0, "00", 2) < 0) || (memcmp(time_str+0, "99", 2) > 0)) return; //year
+	if((memcmp(time_str+3, "00", 2) < 0) || (memcmp(time_str+3, "12", 2) > 0)) return; //month
+	if((memcmp(time_str+6, "00", 2) < 0) || (memcmp(time_str+6, "31", 2) > 0)) return; //day	
+	
+	yt = time_str[0]-'0';
+	yu = time_str[1]-'0';
+	mt = time_str[3]-'0';
+	mu = time_str[4]-'0';
+	dt = time_str[6]-'0';
+	du = time_str[7]-'0';
+	
+	year = (yt<<4) + (yu&0x0F);
+	month = (mt<<4) + (mu&0x0F);
+	day = (dt<<4) + (du&0x0F);	
+	
+	date = (year << 16) | (month << 8) | (day << 0);	
 	
 	RTC->WPR = 0xCA;
 	RTC->WPR = 0x53;
@@ -70,7 +98,7 @@ uint32_t date;
  **********************************/
 uint8_t read_hour(void) {
 uint8_t hour;
-	hour = (RTC->TR >> 16)&0x7F;
+	hour = (RTC->TR >> 16)&0x3F;
 	hour = (hour>>4)*10+(hour&0x0F);
 	return hour;
 }
@@ -78,8 +106,8 @@ uint8_t hour;
 char * read_bcd_time(void) {
 static char time[6];
 uint32_t dr, tr;
-	dr = RTC->DR & 0xFF1FFF;
-	tr = RTC->TR;
+	dr = RTC->DR & 0xFF1F3F;
+	tr = RTC->TR & 0x3F7F7F;
 	time[0] = (dr>>16) & 0xFF;
 	time[1] = (dr>>8 ) & 0xFF;
 	time[2] = (dr>>0 ) & 0xFF;
@@ -88,6 +116,38 @@ uint32_t dr, tr;
 	time[5] = (tr>>0 ) & 0xFF;
 	
 	return time;
+}
+
+void rtc_check_n_update(void) {
+static char old_date[10] = "16/01/01";
+static char old_time[10] = "23:59:59";
+char bcd_time[6];
+char new_date[10], new_time[10];
+char valid = 1;	
+	
+	memcpy(bcd_time, read_bcd_time(), 6);
+	
+	new_date[0] = (bcd_time[0]>>4)+'0'; new_date[1] = (bcd_time[0]&0x0F)+'0'; new_date[2] = '/';
+	new_date[3] = (bcd_time[1]>>4)+'0'; new_date[4] = (bcd_time[1]&0x0F)+'0'; new_date[5] = '/';
+	new_date[6] = (bcd_time[2]>>4)+'0'; new_date[7] = (bcd_time[2]&0x0F)+'0'; new_date[8] = 0;
+	new_time[0] = (bcd_time[3]>>4)+'0'; new_time[1] = (bcd_time[3]&0x0F)+'0'; new_time[2] = ':';
+	new_time[3] = (bcd_time[4]>>4)+'0'; new_time[4] = (bcd_time[4]&0x0F)+'0'; new_time[5] = ':';
+	new_time[6] = (bcd_time[5]>>4)+'0'; new_time[7] = (bcd_time[5]&0x0F)+'0'; new_time[8] = 0;
+	
+	if((memcmp(new_date+0, "00", 2) < 0) || (memcmp(new_date+0, "99", 2) > 0)) valid=0; //year
+	if((memcmp(new_date+3, "00", 2) < 0) || (memcmp(new_date+3, "12", 2) > 0)) valid=0; //month
+	if((memcmp(new_date+6, "00", 2) < 0) || (memcmp(new_date+6, "31", 2) > 0)) valid=0; //day	
+	if((memcmp(new_time+0, "00", 2) < 0) || (memcmp(new_time+0, "24", 2) > 0)) valid=0; //hour
+	if((memcmp(new_time+3, "00", 2) < 0) || (memcmp(new_time+3, "60", 2) > 0)) valid=0; //minute
+	if((memcmp(new_time+6, "00", 2) < 0) || (memcmp(new_time+6, "60", 2) > 0)) valid=0; //second	
+
+	if(valid) {
+		memcpy(old_date, new_date, 10);
+		memcpy(old_time, new_time, 10);
+	} else {
+		set_date(old_date);
+		set_time(old_time);
+	}
 }
 
 /**********************************

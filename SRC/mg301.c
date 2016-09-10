@@ -3,10 +3,10 @@
 void mg_init(void) {
 	MG301_HALT();
 	sleep(1);
-	MG301_PWON();	
-	sleep(15);
-	
+	MG301_PWON();
+	sleep(5);
 	disable_echo();
+	sleep(25);
 }
 
 void mg_cmd(const char *str) {
@@ -54,7 +54,6 @@ uint8_t hour;
 		time[8] = 0;
 		date[8] = 0;
 		set_date(date);
-		set_time(time);
 		
 		if(hour >= 24) {
 			set_time("23:59:59");
@@ -96,16 +95,17 @@ uint8_t retry, ret=1;
 	
 	sprintf(str, "%s=%d\n", "AT^SISO", id);
 	
-	for(retry=0; retry<1; retry++) {
+	for(retry=0; retry<3; retry++) {
 		mg_cmd("AT+CHUP");
+		sleep(1);
 		mg_cmd(str);
-		sleep(3);
+		sleep(5);
 		mg_cmd("AT^SISO?");
 		if(strstr(get_usart2_buf(), "\"4\"")) {
 			ret = 0;
 			break;
 		}
-		sleep(3);
+		sleep(5);
 	}
 	return ret;
 }
@@ -138,13 +138,14 @@ uint8_t retry, ret=1;
 uint16_t i;
 	
 	sprintf(sisw, "%s=%d,%d\n", "AT^SISW", id, len);
-	for(retry=0; retry<1; retry++) {
+	for(retry=0; retry<3; retry++) {
 		mg_cmd("AT+CHUP");
+		sleep(1);
 		mg_cmd(sisw);
 		for(i=0; i<len; i++) {
 			yputc(buf[i]);
 		}
-		sleep(3);
+		sleep(5);
 		if(strstr(get_usart2_buf(), "OK")) {
 			ret = 0;
 			break;
@@ -161,11 +162,12 @@ uint8_t retry, ret=1;
 	
 	len = strlen(msg);
 	sprintf(sisw, "%s=%d,%d\n", "AT^SISW", id, len);
-	for(retry=0; retry<2; retry++) {
+	for(retry=0; retry<3; retry++) {
 		mg_cmd("AT+CHUP");
+		sleep(1);
 		mg_cmd(sisw);
 		mg_cmd(msg);
-		sleep(3);
+		sleep(5);
 		if(strstr(get_usart2_buf(), "OK")) {
 			ret = 0;
 			break;
@@ -180,14 +182,15 @@ uint16_t num=0, retry;
 char read[32]= "AT^SISR=0,", temp[32];
 char *p;	
 	
-	for(retry=0; retry<1; retry++) {
+	for(retry=0; retry<3; retry++) {
 		mg_cmd("AT+CHUP");
+		sleep(1);
 		mg_cmd("AT^SISR=0,0");
 		if((p=strstr(get_usart2_buf(), "SISR: 0,")) != NULL) {
 			p += strlen("SISR: 0,");
 			num = atoi(p);
 			if(num == 0) {
-				sleep(3);
+				sleep(5);
 				continue;
 			}
 			if((num > 0) && (num <= len)) {
@@ -213,9 +216,9 @@ char sisc[32];
 uint8_t retry, ret=1;
 	
 	sprintf(sisc, "%s=%d\n", "AT^SISC", id);
-	for(retry=0; retry<1; retry++) {
+	for(retry=0; retry<3; retry++) {
 		mg_cmd(sisc);
-		sleep(3);
+		sleep(5);
 		if(strstr(get_usart2_buf(), "OK")) {
 			ret = 0;
 			break;
@@ -246,11 +249,12 @@ uint8_t ret=0;
 	if(strstr(get_usart2_buf(), "RING")) {
 		mg_cmd("AT+CLCC");
 		if(strstr(get_usart2_buf(), phone) == NULL) {
-			sleep(3);
+			sleep(5);
 		} else {
 			ret = 1;
 		}
-		mg_cmd("AT+CHUP");		
+		mg_cmd("AT+CHUP");
+		sleep(1);		
 	}
 	
 	return ret;

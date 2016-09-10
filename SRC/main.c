@@ -51,6 +51,8 @@ char msg[RTU_MSG_SIZE];
 			rs485_handle(get_usart1_buf(), get_usart1_rx_cnt());
 			usart1_buf_clr();
 		}
+		
+		rtc_check_n_update();
 	}
 }
 
@@ -107,17 +109,6 @@ s_rcv_cfg *cfg;
 	}
 }
 
-uint8_t is_time_format(char *time) {
-	if((memcmp(time+0, "00", 2) < 0) || (memcmp(time+0, "99", 2) > 0)) return 0; //year
-	if((memcmp(time+2, "00", 2) < 0) || (memcmp(time+2, "19", 2) > 0)) return 0; //month
-	if((memcmp(time+4, "00", 2) < 0) || (memcmp(time+4, "39", 2) > 0)) return 0; //day
-	if((memcmp(time+6, "00", 2) < 0) || (memcmp(time+6, "29", 2) > 0)) return 0; //hour
-	if((memcmp(time+8, "00", 2) < 0) || (memcmp(time+8, "59", 2) > 0)) return 0; //minute
-	if((memcmp(time+10, "00", 2) < 0) || (memcmp(time+10, "59", 2) > 0)) return 0; //second
-	
-	return 1;
-}
-
 void read_param_n_net_puts(char *msg) {
 char header[] = "460029125715486";
 char send_success = 0;	
@@ -132,9 +123,9 @@ int i, max_record;
 		
 		if(net_open(0) == 0) {
 			net_puts(0, header);
-			sleep(2);
+			sleep(5);
 			net_read(0, msg, 32);
-			if((msg[0] == '#') && is_time_format(msg+1)) {
+			if(msg[0] == '#') {
 			char date[10], time[10];
 				date[0] = msg[1]; date[1] = msg[2]; date[2] = '/';
 				date[3] = msg[3]; date[4] = msg[4]; date[5] = '/';
@@ -147,10 +138,11 @@ int i, max_record;
 				set_date(date);
 				set_time(time);
 			}
-			sleep(1);
+			sleep(5);
 			rtu_xmit_data(msg, get_rainfall(), read_bcd_time(), get_rssi(), get_bat_volt(), get_solar_volt());
 			if(net_write(0, msg, 0x152*2) == 0) {
 			char net_msg[32];
+				sleep(5);
 				net_read(0, net_msg, 32);
 				if(strstr(net_msg, "OK") != NULL) {
 					send_success = 1;

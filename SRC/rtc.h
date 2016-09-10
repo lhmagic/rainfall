@@ -11,6 +11,7 @@ uint8_t read_hour(void);
 void rtc_hour_irq_handle(void);
 uint8_t is_hour_flag(void);
 char * read_bcd_time(void);
+void rtc_check_n_update(void) ;
 
 //private function prototype
 static void set_rtc_alarm(void);
