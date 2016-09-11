@@ -3,7 +3,7 @@
 
 #include	"bsp.h"
 
-#define		CMD_WAIT_TIME				50
+#define		CMD_WAIT_TIME				100
 
 
 

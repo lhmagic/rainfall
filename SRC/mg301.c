@@ -1,12 +1,22 @@
 #include	"mg301.h"
 
 void mg_init(void) {
+uint8_t i;
+	
 	MG301_HALT();
 	sleep(1);
 	MG301_PWON();
 	sleep(5);
 	disable_echo();
-	sleep(25);
+	for(i=0; i<60; i++) {
+		if(is_rcv_nwtime()) {
+			debug("update time from NWTIME\r\n");
+			update_time();
+			usart2_buf_clr();
+			break;
+		}
+		sleep(1);
+	}
 }
 
 void mg_cmd(const char *str) {
@@ -91,21 +101,20 @@ char str[128];
 
 uint8_t net_open(uint8_t id) {
 char str[32];
-uint8_t retry, ret=1;
+uint8_t i, retry, ret=1;
 	
 	sprintf(str, "%s=%d\n", "AT^SISO", id);
 	
 	for(retry=0; retry<3; retry++) {
 		mg_cmd("AT+CHUP");
 		sleep(1);
-		mg_cmd(str);
-		sleep(5);
-		mg_cmd("AT^SISO?");
-		if(strstr(get_usart2_buf(), "\"4\"")) {
-			ret = 0;
-			break;
+		mg_cmd(str);		
+		for(i=0; i<10; i++) {
+			sleep(1);
+			if(is_net_connected(0)) {
+				return 0;
+			}		
 		}
-		sleep(5);
 	}
 	return ret;
 }
@@ -114,6 +123,7 @@ uint8_t is_net_connected(uint8_t id) {
 char findstr[32];
 char *p;
 uint8_t i, connected=0;	
+	
 	sprintf(findstr, "%s %d", "^SISO:", id);
 	mg_cmd("AT^SISO?");
 	if((p=strstr(get_usart2_buf(), findstr)) != NULL) {
@@ -135,7 +145,7 @@ uint8_t i, connected=0;
 uint8_t net_write(uint8_t id, const char *buf, uint16_t len) {
 char sisw[128] = "AT^SISW=0,";
 uint8_t retry, ret=1;
-uint16_t i;
+uint16_t i,j;
 	
 	sprintf(sisw, "%s=%d,%d\n", "AT^SISW", id, len);
 	for(retry=0; retry<3; retry++) {
@@ -145,11 +155,14 @@ uint16_t i;
 		for(i=0; i<len; i++) {
 			yputc(buf[i]);
 		}
-		sleep(5);
-		if(strstr(get_usart2_buf(), "OK")) {
-			ret = 0;
-			break;
-		}	
+		for(j=0; j<10; j++) {
+			sleep(1);
+			if(strstr(get_usart2_buf(), "OK")) {
+				return 0;
+			} else if(strstr(get_usart2_buf(), "ERROR")) {
+				return 1;
+			}	
+		}
 	}
 	
 	return ret;
@@ -158,7 +171,7 @@ uint16_t i;
 uint8_t net_puts(uint8_t id, const char *msg) {
 char sisw[128] = "AT^SISW=0,";
 int len;
-uint8_t retry, ret=1;
+uint8_t i, retry, ret=1;
 	
 	len = strlen(msg);
 	sprintf(sisw, "%s=%d,%d\n", "AT^SISW", id, len);
@@ -167,22 +180,25 @@ uint8_t retry, ret=1;
 		sleep(1);
 		mg_cmd(sisw);
 		mg_cmd(msg);
-		sleep(5);
-		if(strstr(get_usart2_buf(), "OK")) {
-			ret = 0;
-			break;
-		}	
+		for(i=0; i<10; i++) {
+			sleep(1);
+			if(strstr(get_usart2_buf(), "OK")) {
+				return 0;
+			} else if(strstr(get_usart2_buf(), "ERROR")) {
+				return 1;
+			}
+		}
 	}
 	
 	return ret;
 }
 
 uint8_t net_read(uint8_t id, char *buf, uint16_t len) {
-uint16_t num=0, retry;
+uint16_t num=0, i;
 char read[32]= "AT^SISR=0,", temp[32];
 char *p;	
 	
-	for(retry=0; retry<3; retry++) {
+	for(i=0; i<10; i++) {
 		mg_cmd("AT+CHUP");
 		sleep(1);
 		mg_cmd("AT^SISR=0,0");
@@ -190,7 +206,6 @@ char *p;
 			p += strlen("SISR: 0,");
 			num = atoi(p);
 			if(num == 0) {
-				sleep(5);
 				continue;
 			}
 			if((num > 0) && (num <= len)) {
@@ -213,16 +228,19 @@ char *p;
 
 uint8_t net_close(uint8_t id) {
 char sisc[32];
-uint8_t retry, ret=1;
+uint8_t i, retry, ret=1;
 	
 	sprintf(sisc, "%s=%d\n", "AT^SISC", id);
 	for(retry=0; retry<3; retry++) {
 		mg_cmd(sisc);
-		sleep(5);
-		if(strstr(get_usart2_buf(), "OK")) {
-			ret = 0;
-			break;
-		}	
+		for(i=0; i<10; i++) {
+			sleep(1);
+			if(strstr(get_usart2_buf(), "OK")) {
+				return 0;
+			} else if(strstr(get_usart2_buf(), "ERROR")) {
+				return 1;
+			}
+		}
 	}
 	
 	return ret;

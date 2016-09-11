@@ -6,6 +6,7 @@ const char *dev_num = (char *)UID_SAVE_ADDR;
 const char *rtu_num = (char *)(UID_SAVE_ADDR+10);
 const char fw_version[2] = "\x03\x92";
 static const char unknown_data[36] = "\x00\x00\x88\xA4\x00\x04\x00\x7B\x7F\xBF\xFD\xBF\xFF\xBF";
+char phone_ring=0;
 
 static const uint8_t upload_time_table[][2] = {
 //start, interval
@@ -76,6 +77,11 @@ char rsp[] = "\x01\x10\x00\x00\x00\x92\x02\x00";
 			//01 10 	0A 	dev_num 	rtu_num crc16
 			update_n_wirte_uid(buf);
 			break;
+#ifdef	DEBUG	
+		case 1:
+			if(memcmp(buf, "X", 1) == 0) 
+				phone_ring = 1;
+			break;
 		case 4:
 			if(memcmp(buf, "TIME", 4) == 0) {
 			char *time;
@@ -90,6 +96,7 @@ char rsp[] = "\x01\x10\x00\x00\x00\x92\x02\x00";
 		case 10:
 			set_time(buf);
 			break;
+#endif		
 		default:
 			break;
 	}

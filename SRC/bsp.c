@@ -71,7 +71,7 @@ void tim15_handle(void) {
 
 static uint8_t raining;
 uint8_t is_raining(void) {
-uint8_t ret = raining;	
+uint8_t ret = raining;
 	raining = 0;
 	return ret;
 }

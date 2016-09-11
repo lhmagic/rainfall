@@ -16,6 +16,12 @@
 #include	"spi.h"
 #include	"m25p16.h"
 
+#ifdef		DEBUG
+#define		debug(msg)					xputs(msg)
+#else
+#define		debug(msg)
+#endif
+
 
 #define		SYSCLK								8000000
 

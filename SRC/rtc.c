@@ -28,7 +28,7 @@ uint8_t hour, min, sec, ht, hu, mt, mu, st, su;
 	if((memcmp(time_str+3, "00", 2) < 0) || (memcmp(time_str+3, "60", 2) > 0)) return; //minute
 	if((memcmp(time_str+6, "00", 2) < 0) || (memcmp(time_str+6, "60", 2) > 0)) return; //second	
 	
-	xputs("update time.\r\n");
+	debug("update time.\r\n");
 	
 	ht = time_str[0]-'0';
 	hu = time_str[1]-'0';
@@ -69,7 +69,7 @@ uint8_t year, month, day, yt, yu, mt, mu, dt, du;
 	if((memcmp(time_str+3, "00", 2) < 0) || (memcmp(time_str+3, "12", 2) > 0)) return; //month
 	if((memcmp(time_str+6, "00", 2) < 0) || (memcmp(time_str+6, "31", 2) > 0)) return; //day	
 	
-	xputs("update date\r\n");
+	debug("update date.\r\n");
 	
 	yt = time_str[0]-'0';
 	yu = time_str[1]-'0';
@@ -151,7 +151,7 @@ char valid = 1;
 	} else {
 		set_date(old_date);
 		set_time(old_time);
-		xputs("RTC error.\r\n");
+		debug("RTC error.\r\n");
 	}
 }
 
