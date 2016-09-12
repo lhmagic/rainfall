@@ -100,8 +100,9 @@ char str[128];
 }
 
 uint8_t net_open(uint8_t id) {
-char str[32];
+char str[32], msg[32];
 uint8_t i, retry, ret=1;
+char header[] = "460029125715486";	
 	
 	sprintf(str, "%s=%d\n", "AT^SISO", id);
 	
@@ -112,7 +113,25 @@ uint8_t i, retry, ret=1;
 		for(i=0; i<10; i++) {
 			sleep(1);
 			if(is_net_connected(0)) {
-				return 0;
+				if(net_puts(0, header) == 0) {
+					if(net_read(0, msg, 32) != 0) {
+						if(msg[0] == '#') {
+						char date[10], time[10];
+							date[0] = msg[1]; date[1] = msg[2]; date[2] = '/';
+							date[3] = msg[3]; date[4] = msg[4]; date[5] = '/';
+							date[6] = msg[5]; date[7] = msg[6]; date[8] = 0;
+							
+							time[0] = msg[7]; time[1] = msg[8]; time[2] = ':';
+							time[3] = msg[9]; time[4] = msg[10]; time[5] = ':';
+							time[6] = msg[11]; time[7] = msg[12]; time[8] = 0;
+
+							debug("update time from server.\r\n");
+							set_date(date);
+							set_time(time);
+							return 0;
+						}					
+					}
+				}
 			}		
 		}
 	}

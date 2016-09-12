@@ -112,7 +112,6 @@ s_rcv_cfg *cfg;
 }
 
 void read_param_n_net_puts(char *msg) {
-char header[] = "460029125715486";
 char send_success = 0;	
 int i, max_record;	
 
@@ -123,39 +122,20 @@ int i, max_record;
 	if(read_local_param() == 0) {
 		set_profile(0, rtu_param.ip1, rtu_param.apn, rtu_param.uname, rtu_param.passwd);
 		
-		net_open(0);
 		if(net_open(0) == 0) {
 			debug("net open success.\r\n");
 			sleep(5);
-			if(net_puts(0, header) == 0) {
-				net_read(0, msg, 32);
-				if(msg[0] == '#') {
-				char date[10], time[10];
-					date[0] = msg[1]; date[1] = msg[2]; date[2] = '/';
-					date[3] = msg[3]; date[4] = msg[4]; date[5] = '/';
-					date[6] = msg[5]; date[7] = msg[6]; date[8] = 0;
-					
-					time[0] = msg[7]; time[1] = msg[8]; time[2] = ':';
-					time[3] = msg[9]; time[4] = msg[10]; time[5] = ':';
-					time[6] = msg[11]; time[7] = msg[12]; time[8] = 0;
-
-					debug("update time from server.\r\n");
-					set_date(date);
-					set_time(time);
-				}
+			rtu_xmit_data(msg, get_rainfall(), read_bcd_time(), get_rssi(), get_bat_volt(), get_solar_volt());
+			if(net_write(0, msg, 0x152*2) == 0) {
+			char net_msg[32];
+				debug("write success\r\n");
 				sleep(5);
-				rtu_xmit_data(msg, get_rainfall(), read_bcd_time(), get_rssi(), get_bat_volt(), get_solar_volt());
-				if(net_write(0, msg, 0x152*2) == 0) {
-				char net_msg[32];
-					debug("write success\r\n");
-					sleep(5);
-					net_read(0, net_msg, 32);
-					if(strstr(net_msg, "OK") != NULL) {
-						debug("received ok.\r\n");
-						send_success = 1;
-					}
-				}			
-			}
+				net_read(0, net_msg, 32);
+				if(strstr(net_msg, "OK") != NULL) {
+					debug("received ok.\r\n");
+					send_success = 1;
+				}
+			}			
 			net_close(0);
 		}
 		
@@ -208,7 +188,6 @@ static void puts_local_records(char *msg) {
 char buf[PAGE_SIZE];
 int i, j, max_record;
 s_var_data *record;
-char header[] = "460029125715486";
 uint8_t server_online=0;	
 	
 	debug("xmit local record.\r\n");
@@ -218,30 +197,9 @@ uint8_t server_online=0;
 	if(read_local_param() == 0) {
 		set_profile(0, rtu_param.ip1, rtu_param.apn, rtu_param.uname, rtu_param.passwd);
 		
-		net_open(0);
 		if(net_open(0) == 0) {
 			debug("net open success.\r\n");
-			if(net_puts(0, header) == 0) {
-				sleep(5);
-				if(net_read(0, msg, 32) != 0) {
-					server_online = 1;
-				}
-				if(msg[0] == '#') {
-				char date[10], time[10];
-					date[0] = msg[1]; date[1] = msg[2]; date[2] = '/';
-					date[3] = msg[3]; date[4] = msg[4]; date[5] = '/';
-					date[6] = msg[5]; date[7] = msg[6]; date[8] = 0;
-					
-					time[0] = msg[7]; time[1] = msg[8]; time[2] = ':';
-					time[3] = msg[9]; time[4] = msg[10]; time[5] = ':';
-					time[6] = msg[11]; time[7] = msg[12]; time[8] = 0;
-
-					debug("update time.\r\n");
-					
-					set_date(date);
-					set_time(time);
-				}				
-			}
+			server_online = 1;
 		}
 	}
 	
@@ -263,6 +221,7 @@ uint8_t server_online=0;
 			continue;
 		}
 		
+		debug("xmit flash record.\r\n");
 		for(j=0; j<max_record; j++) {
 			if(record[j].flag == 0xA5) {
 				sleep(5);
@@ -273,9 +232,10 @@ uint8_t server_online=0;
 					if(strstr(net_msg, "OK") == NULL) {
 						debug("no response received, xmit abort.\r\n");
 						return ;
+					} else {
+						debug("xmit success.\r\n");
 					}
 				}
-				debug("xmit success.\r\n");
 			}
 		}
 		
