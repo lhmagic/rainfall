@@ -14,7 +14,7 @@ static uint16_t get_solar_volt(void);
 static void puts_local_records(char *msg) ;
 static void read_page_pointer(void);
 
-extern char phone_ring;
+
 int main(void) {
 char msg[RTU_MSG_SIZE];
 
@@ -44,9 +44,8 @@ char msg[RTU_MSG_SIZE];
 			read_param_n_net_puts(msg);
 		}
 		
-		if(is_ring(rtu_param.phone1) || phone_ring) {
+		if(is_ring(rtu_param.phone1)) {
 			puts_local_records(msg);
-			phone_ring = 0;
 		}
 		
 		if(is_usart1_rx_done()) {
