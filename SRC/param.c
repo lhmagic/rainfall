@@ -4,7 +4,7 @@ s_param  rtu_param;
 
 const char *dev_num = (char *)UID_SAVE_ADDR;
 const char *rtu_num = (char *)(UID_SAVE_ADDR+10);
-const char fw_version[2] = "\x03\x94";
+const char fw_version[2] = "\x03\x95";
 static const char unknown_data[36] = "\x00\x00\x88\xA4\x00\x04\x00\x7B\x7F\xBF\xFD\xBF\xFF\xBF";
 
 

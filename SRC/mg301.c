@@ -110,10 +110,11 @@ char header[] = "460029125715486";
 		mg_cmd("AT+CHUP");
 		sleep(1);
 		mg_cmd(str);		
-		for(i=0; i<10; i++) {
+		for(i=0; i<5; i++) {
 			sleep(1);
 			if(is_net_connected(0)) {
 				if(net_puts(0, header) == 0) {
+					sleep(5);
 					if(net_read(0, msg, 32) != 0) {
 						if(msg[0] == '#') {
 						char date[10], time[10];
@@ -164,7 +165,7 @@ uint8_t i, connected=0;
 uint8_t net_write(uint8_t id, const char *buf, uint16_t len) {
 char sisw[128] = "AT^SISW=0,";
 uint8_t retry, ret=1;
-uint16_t i,j;
+uint16_t i;
 	
 	sprintf(sisw, "%s=%d,%d\n", "AT^SISW", id, len);
 	for(retry=0; retry<3; retry++) {
@@ -174,7 +175,7 @@ uint16_t i,j;
 		for(i=0; i<len; i++) {
 			yputc(buf[i]);
 		}
-		for(j=0; j<10; j++) {
+		for(i=0; i<5; i++) {
 			sleep(1);
 			if(strstr(get_usart2_buf(), "OK")) {
 				return 0;
@@ -194,12 +195,12 @@ uint8_t i, retry, ret=1;
 	
 	len = strlen(msg);
 	sprintf(sisw, "%s=%d,%d\n", "AT^SISW", id, len);
+	mg_cmd("AT+CHUP");
+	sleep(1);
+	mg_cmd(sisw);
+	mg_cmd(msg);	
 	for(retry=0; retry<3; retry++) {
-		mg_cmd("AT+CHUP");
-		sleep(1);
-		mg_cmd(sisw);
-		mg_cmd(msg);
-		for(i=0; i<10; i++) {
+		for(i=0; i<5; i++) {
 			sleep(1);
 			if(strstr(get_usart2_buf(), "OK")) {
 				return 0;
@@ -252,7 +253,7 @@ uint8_t i, retry, ret=1;
 	sprintf(sisc, "%s=%d\n", "AT^SISC", id);
 	for(retry=0; retry<3; retry++) {
 		mg_cmd(sisc);
-		for(i=0; i<10; i++) {
+		for(i=0; i<5; i++) {
 			sleep(1);
 			if(strstr(get_usart2_buf(), "OK")) {
 				return 0;
