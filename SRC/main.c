@@ -114,9 +114,7 @@ void read_param_n_net_puts(char *msg) {
 char send_success = 0;	
 int i, max_record;	
 
-	if(!is_gm301_on()) {
-		mg_init();
-	}
+	mg_init();
 	
 	if(read_local_param() == 0) {
 		set_profile(0, rtu_param.ip1, rtu_param.apn, rtu_param.uname, rtu_param.passwd);
@@ -190,6 +188,8 @@ s_var_data *record;
 uint8_t server_online=0;	
 	
 	debug("xmit local record.\r\n");
+	
+	mg_init();
 	
 	max_record = 256/sizeof(s_var_data);
 	

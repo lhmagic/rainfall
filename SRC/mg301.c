@@ -109,7 +109,7 @@ char header[] = "460029125715486";
 	for(retry=0; retry<3; retry++) {
 		mg_cmd("AT+CHUP");
 		sleep(1);
-		mg_cmd(str);		
+		mg_cmd(str);
 		for(i=0; i<5; i++) {
 			sleep(1);
 			if(is_net_connected(0)) {
