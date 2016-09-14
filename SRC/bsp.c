@@ -125,13 +125,14 @@ void gpio_init(void) {
 
 void pulse_cnt_handle(void) {
 	if(EXTI->PR & EXTI_PR_PIF0) {
-		EXTI->PR |= EXTI_PR_PIF0;	
 		if((GPIOA->IDR & GPIO_IDR_0) == 0) {
 			//RTC->BKP0R is used to save pulse count
 			RTC->BKP0R++;
-			set_raining();
+			//第一次初始化TIM15的时候会进入一次中断，所以注视掉set_raining
+//			set_raining();
 			tim15_init(300);
 		}
+		EXTI->PR |= EXTI_PR_PIF0;
 	}
 }
 

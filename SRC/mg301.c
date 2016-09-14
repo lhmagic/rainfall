@@ -66,8 +66,13 @@ uint8_t hour;
 		set_date(date);
 		
 		if(hour >= 24) {
+			//更新跨天日期时禁止RTC中断，避免重复进入RTC中断的问题
+			NVIC_DisableIRQ(RTC_IRQn);;
 			set_time("23:59:59");
 			sleep(2);
+			RTC->ISR &= ~RTC_ISR_ALRAF;
+			EXTI->PR |= EXTI_PR_PIF17;
+			NVIC_EnableIRQ(RTC_IRQn);;
 		}
 		set_time(time);
 	}
