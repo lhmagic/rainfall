@@ -11,9 +11,12 @@ static void rtu_xmit_data(char *msg, uint32_t rainfall, char *time, uint8_t rssi
 static void read_param_n_net_puts(char *msg);
 static uint16_t get_bat_volt(void) ;
 static uint16_t get_solar_volt(void);
-static void puts_local_records(char *msg) ;
 static void read_page_pointer(void);
+static void puts_local_records(char *msg) ;
 
+#ifdef	DEBUG
+	extern uint8_t simulate_ring;
+#endif
 
 int main(void) {
 char msg[RTU_MSG_SIZE];
@@ -52,6 +55,13 @@ char msg[RTU_MSG_SIZE];
 			rs485_handle(get_usart1_buf(), get_usart1_rx_cnt());
 			usart1_buf_clr();
 		}
+		
+#ifdef	DEBUG
+		if(simulate_ring) {
+			simulate_ring = 0;
+			puts_local_records(msg);
+		}
+#endif		
 		
 		//rtc_check_n_update();
 	}
@@ -181,7 +191,7 @@ int i;
 	}
 }
 
-static void puts_local_records(char *msg) {
+void puts_local_records(char *msg) {
 char buf[PAGE_SIZE];
 int i, j, max_record;
 s_var_data *record;

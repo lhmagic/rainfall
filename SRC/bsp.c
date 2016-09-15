@@ -49,10 +49,13 @@ void tim15_init(uint16_t sec) {
 	TIM15->CNT = 1;
 	TIM15->CR1 |= TIM_CR1_URS;
 	TIM15->SR &= ~TIM_SR_UIF;
-	TIM15->CR1 |= TIM_CR1_CEN;
 	TIM15->DIER |= TIM_DIER_UIE;
-//	TIM15->SR &= ~TIM_SR_UIF;
-//	NVIC_ClearPendingIRQ(TIM15_IRQn);
+	TIM15->EGR |= TIM_EGR_UG;
+	TIM15->EGR &= ~TIM_EGR_UG;
+	TIM15->SR &= ~TIM_SR_UIF;
+	TIM15->CR1 |= TIM_CR1_CEN;
+	
+	NVIC_ClearPendingIRQ(TIM15_IRQn);
 	NVIC_SetPriority(TIM15_IRQn, 0);
 	NVIC_EnableIRQ(TIM15_IRQn);	
 }
@@ -65,6 +68,7 @@ void tim15_disable(void) {
 void tim15_handle(void) {
 	if(TIM15->SR & TIM_SR_UIF) {
 		TIM15->SR &= ~TIM_SR_UIF;
+		debug("set raining in time isr\r\n");
 		set_raining();
 	}		
 }
@@ -128,9 +132,9 @@ void pulse_cnt_handle(void) {
 		if((GPIOA->IDR & GPIO_IDR_0) == 0) {
 			//RTC->BKP0R is used to save pulse count
 			RTC->BKP0R++;
-			//第一次初始化TIM15的时候会进入一次中断，所以注视掉set_raining
-//			set_raining();
 			tim15_init(300);
+			debug("set raining in irq.\r\n");
+			set_raining();
 		}
 		EXTI->PR |= EXTI_PR_PIF0;
 	}

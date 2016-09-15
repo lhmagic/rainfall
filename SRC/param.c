@@ -7,6 +7,9 @@ const char *rtu_num = (char *)(UID_SAVE_ADDR+10);
 const char fw_version[2] = "\x03\x96";
 static const char unknown_data[36] = "\x00\x00\x88\xA4\x00\x04\x00\x7B\x7F\xBF\xFD\xBF\xFF\xBF";
 
+#ifdef	DEBUG
+	uint8_t simulate_ring =0;
+#endif
 
 static const uint8_t upload_time_table[][2] = {
 //start, interval
@@ -87,6 +90,11 @@ char rsp[] = "\x01\x10\x00\x00\x00\x92\x02\x00";
 					xputc((time[cnt]&0x0F)+'0');
 				}
 				xputs("\r\n");
+			}
+			break;
+		case 6:
+			if(memcmp(buf, "UPLOAD", 6) == 0) {
+				simulate_ring = 1;
 			}
 			break;
 		case 10:
